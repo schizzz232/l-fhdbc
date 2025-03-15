@@ -23,11 +23,11 @@ class Provider:
             "huggingface": self.huggingface_fn
         }
         self.api_key = None
-        self.unsafe_providers = ["openai"]
+        self.unsafe_providers = ["openai", "ollama", "server", "huggingface"]
         if self.provider_name not in self.available_providers:
             raise ValueError(f"Unknown provider: {provider_name}")
         if self.provider_name in self.unsafe_providers:
-            print("Warning: you are using an API provider. You data will be sent to the cloud.")
+            print("Warning: you are using an API provider. You data will be sent to the cloud. If you chose ollama or server, then input anything for the API key (unless using programs like TabbyAPI that creates a unique API for locally run models)")
             self.get_api_key(self.provider_name)
         elif self.server != "":
             print("Provider initialized at ", self.server)
