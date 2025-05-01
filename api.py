@@ -16,8 +16,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from sources.agents import (BrowserAgent, CasualAgent, CoderAgent, FileAgent,
-                            PlannerAgent)
+from sources.agents import (
+    BrowserAgent,
+    CasualAgent,
+    CoderAgent,
+    FileAgent,
+    PlannerAgent,
+)
 from sources.browser import Browser, create_driver
 from sources.interaction import Interaction
 from sources.llm_provider import Provider

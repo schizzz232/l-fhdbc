@@ -6,8 +6,14 @@ import configparser
 import sys
 import warnings
 
-from sources.agents import (Agent, BrowserAgent, CasualAgent, CoderAgent,
-                            FileAgent, PlannerAgent)
+from sources.agents import (
+    Agent,
+    BrowserAgent,
+    CasualAgent,
+    CoderAgent,
+    FileAgent,
+    PlannerAgent,
+)
 from sources.browser import Browser, create_driver
 from sources.interaction import Interaction
 from sources.llm_provider import Provider

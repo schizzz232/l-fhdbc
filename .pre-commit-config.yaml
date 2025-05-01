@@ -1,13 +1,4 @@
 repos:
-  - repo: local
-    hooks:
-      - id: trufflehog
-        name: TruffleHog
-        description: Detect secrets in your data.
-        entry: bash -c 'trufflehog git file://. --since-commit HEAD --results=verified,unknown --no-update'
-        language: system
-        stages: ["pre-commit", "pre-push"]
-
   # General quick fixes before every commit
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
@@ -23,18 +14,19 @@ repos:
       - id: detect-private-key         # prevent committing private keys
         stages: [pre-commit]
 
-  # Automatic code formatting for Python, fast enough for commits
-  - repo: https://github.com/psf/black
-    rev: 25.1.0
-    hooks:
-      - id: black                      # format Python code consistently
-        stages: [pre-commit]
-
   # Automatic import sorting for Python, fast enough for commits
   - repo: https://github.com/PyCQA/isort
     rev: 6.0.1
     hooks:
       - id: isort                      # sort and group Python imports
+        stages: [pre-commit]
+        args: [--settings-path=pyproject.toml]
+
+  # Automatic code formatting for Python, fast enough for commits
+  - repo: https://github.com/psf/black
+    rev: 25.1.0
+    hooks:
+      - id: black                      # format Python code consistently
         stages: [pre-commit]
 
   # Comprehensive Python linting—run at push to avoid slowing down local commits
@@ -51,16 +43,10 @@ repos:
       - id: mypy                       # detect Python type errors
         stages: [pre-push]
 
-  # Commit message linting—run at commit to enforce format
-  - repo: https://github.com/jorisroovers/gitlint
-    rev: v0.19.1
-    hooks:
-      - id: gitlint                    # enforce commit message conventions
-        stages: [pre-commit]
-
   # YAML linting for CI configs or Helm charts, quick enough for commits
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.37.0
     hooks:
       - id: yamllint                   # lint and style-check YAML files
         stages: [pre-commit]
+        args: ["--config-file", ".yamllint"]

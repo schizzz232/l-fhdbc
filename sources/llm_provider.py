@@ -338,8 +338,14 @@ class Provider:
         For free api. Api key should be set to DSK_DEEPSEEK_API_KEY
         This is an unofficial provider, you'll have to find how to set it up yourself.
         """
-        from dsk.api import (APIError, AuthenticationError, CloudflareError,
-                             DeepSeekAPI, NetworkError, RateLimitError)
+        from dsk.api import (
+            APIError,
+            AuthenticationError,
+            CloudflareError,
+            DeepSeekAPI,
+            NetworkError,
+            RateLimitError,
+        )
 
         thought = ""
         message = "\n---\n".join(

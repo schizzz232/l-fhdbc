@@ -66,10 +66,11 @@ services:
     networks:
       - agentic-seek-net
 
-  # NOTE: backend service is not working yet due to issue with chromedriver on docker.
+  # NOTE: backend service is not working yet
+  # due to issue with chromedriver on docker.
   # Therefore backend is run on host machine.
   # Open to pull requests to fix this.
-
+  #
   #backend:
   #  container_name: backend
   #  build:
