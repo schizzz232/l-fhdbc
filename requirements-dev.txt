@@ -1,0 +1,7 @@
+# requirements-dev.txt
+pre-commit>=3.4.0
+black>=25.1.0
+isort>=6.0.1
+flake8>=7.2.0
+mypy>=1.15.0
+yamllint>=1.37.0

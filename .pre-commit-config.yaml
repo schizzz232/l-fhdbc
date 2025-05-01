@@ -6,4 +6,61 @@ repos:
         description: Detect secrets in your data.
         entry: bash -c 'trufflehog git file://. --since-commit HEAD --results=verified,unknown --no-update'
         language: system
-        stages: ["commit", "push"]
+        stages: ["pre-commit", "pre-push"]
+
+  # General quick fixes before every commit
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace        # remove trailing whitespace
+        stages: [pre-commit]
+      - id: end-of-file-fixer          # ensure a newline at end of file
+        stages: [pre-commit]
+      - id: check-yaml                 # validate YAML syntax
+        stages: [pre-commit]
+      - id: check-added-large-files    # block adding files larger than 5MB
+        stages: [pre-commit]
+      - id: detect-private-key         # prevent committing private keys
+        stages: [pre-commit]
+
+  # Automatic code formatting for Python, fast enough for commits
+  - repo: https://github.com/psf/black
+    rev: 25.1.0
+    hooks:
+      - id: black                      # format Python code consistently
+        stages: [pre-commit]
+
+  # Automatic import sorting for Python, fast enough for commits
+  - repo: https://github.com/PyCQA/isort
+    rev: 6.0.1
+    hooks:
+      - id: isort                      # sort and group Python imports
+        stages: [pre-commit]
+
+  # Comprehensive Python linting—run at push to avoid slowing down local commits
+  - repo: https://github.com/PyCQA/flake8
+    rev: 7.2.0
+    hooks:
+      - id: flake8                     # check code style and catch errors
+        stages: [pre-push]
+
+  # Static type checking—run at push so it doesn’t block quick local commits
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.15.0
+    hooks:
+      - id: mypy                       # detect Python type errors
+        stages: [pre-push]
+
+  # Commit message linting—run at commit to enforce format
+  - repo: https://github.com/jorisroovers/gitlint
+    rev: v0.19.1
+    hooks:
+      - id: gitlint                    # enforce commit message conventions
+        stages: [pre-commit]
+
+  # YAML linting for CI configs or Helm charts, quick enough for commits
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.37.0
+    hooks:
+      - id: yamllint                   # lint and style-check YAML files
+        stages: [pre-commit]
