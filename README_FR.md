@@ -26,19 +26,19 @@ https://github.com/user-attachments/assets/4bd5faf6-459f-4f94-bd1d-238c4b331469
 
 ## Fonctionnalités:
 
-- **100% Local**: Fonctionne en local sur votre PC. Vos données restent les vôtres. 
+- **100% Local**: Fonctionne en local sur votre PC. Vos données restent les vôtres.
 
 - **Accès à vos Fichiers**: Utilise bash pour naviguer et manipuler vos fichiers.
 
-- **Codage semi-autonome**: Peut écrire, déboguer et exécuter du code en Python, C, Golang et d'autres langages à venir. 
+- **Codage semi-autonome**: Peut écrire, déboguer et exécuter du code en Python, C, Golang et d'autres langages à venir.
 
-- **Routage d'Agent**: Sélectionne automatiquement l’agent approprié pour la tâche. 
+- **Routage d'Agent**: Sélectionne automatiquement l’agent approprié pour la tâche.
 
 - **Planification**: Pour les taches complexe utilise plusieurs agents.
 
 - **Navigation Web Autonome**: Navigation web autonome.
 
-- **Memoire efficace**: Gestion efficace de la mémoire et des sessions. 
+- **Memoire efficace**: Gestion efficace de la mémoire et des sessions.
 
 ---
 
@@ -60,7 +60,7 @@ mv .env.example .env
 
 ```sh
 python3 -m venv agentic_seek_env
-source agentic_seek_env/bin/activate     
+source agentic_seek_env/bin/activate
 # Sur Windows: agentic_seek_env\Scripts\activate
 ```
 
@@ -79,7 +79,7 @@ pip3 install -r requirements.txt
 ```
 
 
-## Faire fonctionner sur votre machine 
+## Faire fonctionner sur votre machine
 
 **Nous recommandons d’utiliser au minimum DeepSeek 14B, les modèles plus petits ont du mal avec l’utilisation des outils et oublient rapidement le contexte.**
 
@@ -160,16 +160,16 @@ Voyez la section **Configuration** pour une explication détaillée du fichier d
 Assurez-vous que les services sont en cours d’exécution avec ./start_services.sh et lancez AgenticSeek avec le CLI ou l'interface Web.
 
 **CLI:**
-Vous verrez un prompt : ">>> "  
-Cela indique qu’AgenticSeek attend que vous saisissiez des instructions.  
-Vous pouvez également utiliser la reconnaissance vocale en définissant `listen = True` dans la configuration.  
-Pour quitter, dites simplement `goodbye`.  
+Vous verrez un prompt : ">>> "
+Cela indique qu’AgenticSeek attend que vous saisissiez des instructions.
+Vous pouvez également utiliser la reconnaissance vocale en définissant `listen = True` dans la configuration.
+Pour quitter, dites simplement `goodbye`.
 
 **Interface:**
 
-Assurez-vous d'avoir bien démarré le backend avec `python3 api.py`.  
-Allez sur `localhost:3000` où vous verrez une interface web.  
-Tapez simplement votre message et patientez.  
+Assurez-vous d'avoir bien démarré le backend avec `python3 api.py`.
+Allez sur `localhost:3000` où vous verrez une interface web.
+Tapez simplement votre message et patientez.
 Si vous n'avez pas d'interface sur `localhost:3000`, c'est que vous n'avez pas démarré les services avec `start_services.sh`.
 
 Voici quelques exemples d’utilisation :
@@ -220,11 +220,11 @@ Fait une recherche sur le web, quels sont les meilleurs pays pour voyager seul?
 
 ---
 
-## **Exécuter le LLM sur votre propre serveur**  
+## **Exécuter le LLM sur votre propre serveur**
 
 Si vous disposez d’un ordinateur puissant ou d’un serveur que vous voulez utiliser, mais que vous souhaitez y accéder depuis votre ordinateur portable, vous avez la possibilité d’exécuter le LLM sur un serveur distant.
 
-### 1️⃣  **Configurer et démarrer les scripts du serveur** 
+### 1️⃣  **Configurer et démarrer les scripts du serveur**
 
 Sur votre "serveur" qui exécutera le modèle IA, obtenez l’adresse IP
 
@@ -256,7 +256,7 @@ python3 app.py --provider ollama --port 3333
 
 Vous avez le choix entre utiliser ollama et llamacpp comme service LLM.
 
-### 2️⃣ **Lancer** 
+### 2️⃣ **Lancer**
 
 Maintenant, sur votre ordinateur personnel :
 
@@ -274,7 +274,7 @@ provider_server_address = x.x.x.x:3333
 
 Ensuite, exécutez avec le CLI ou l'interface graphique comme expliqué dans la section pour les fournisseurs locaux.
 
-## **Exécuter avec une API externe**  
+## **Exécuter avec une API externe**
 
 AVERTISSEMENT : Assurez-vous qu’il n’y a pas d’espace en fin de ligne dans la configuration.
 
@@ -355,9 +355,9 @@ Le tableau ci-dessous montre les LLM providers disponibles :
 
 | Provider  | Local? | Description                                               |
 |-----------|--------|-----------------------------------------------------------|
-| ollama    | Yes    | Exécutez des LLM localement avec facilité en utilisant Ollama comme fournisseur LLM 
-| server    | Yes    | Hébergez le modèle sur une autre machine, exécutez sur votre machine locale 
-| lm-studio  | Yes    | Exécutez un LLM localement avec LM Studio (définissez provider_name sur lm-studio) 
+| ollama    | Yes    | Exécutez des LLM localement avec facilité en utilisant Ollama comme fournisseur LLM
+| server    | Yes    | Hébergez le modèle sur une autre machine, exécutez sur votre machine locale
+| lm-studio  | Yes    | Exécutez un LLM localement avec LM Studio (définissez provider_name sur lm-studio)
 | openai    | No     | Utilise l'API ChatGPT (pas privé) |
 | deepseek-api  | No     | Utilise l'API Deepseek (pas privé) |
 | huggingface| No    | Utilise Hugging-Face (pas privé) |
@@ -380,7 +380,7 @@ provider_server_address = 127.0.0.1:5000
 
 `provider_server_address` : peut être défini sur n’importe quoi si vous n’utilisez pas le fournisseur server.
 
-# Problèmes connus 
+# Problèmes connus
 
 ## Problèmes avec Chromedriver
 
@@ -406,7 +406,7 @@ Et téléchargez la version de chromedriver correspondant à votre système d’
 Si cette section est incomplète, merci de faire une nouvelle issue sur github.
 
 ## FAQ
-**Q: Quel matériel est nécessaire ?**  
+**Q: Quel matériel est nécessaire ?**
 
 | Taille du Modèle  | GPU  | Commentaire                                               |
 |--------------------|------|----------------------------------------------------------|
@@ -415,15 +415,15 @@ Si cette section est incomplète, merci de faire une nouvelle issue sur github.
 | 32B               | 24+ Go VRAM (par ex. RTX 4090) | 🚀 Réussite avec la plupart des tâches, peut encore avoir des difficultés avec la planification des tâches. |
 | 70B+              | 48+ Go VRAM (par ex. Mac Studio) | 💪 Excellent. Recommandé pour des cas d'utilisation avancés. |
 
-**Q: Pourquoi deepseek et pas un autre modèle**  
+**Q: Pourquoi deepseek et pas un autre modèle**
 
 DeepSeek R1 excelle dans le raisonnement et l’utilisation d’outils pour sa taille. Nous pensons que c’est un choix solide pour nos besoins, bien que d’autres modèles fonctionnent également (bien que moins bien pour un nombre équivalent de paramètres).
 
-**Q: J'ai une erreur quand je lance le programme, je fait quoi?**  
+**Q: J'ai une erreur quand je lance le programme, je fait quoi?**
 
 Assurez-vous qu’Ollama est en cours d’exécution (ollama serve), que votre config.ini correspond à votre fournisseur, et que les dépendances sont installées. Si cela ne fonctionne pas, n’hésitez pas à signaler un problème.
 
-**Q: C'est vraiment 100% local?**  
+**Q: C'est vraiment 100% local?**
 
 Oui, avec les fournisseurs Ollama, lm-studio ou Server, toute la reconnaissance vocale, le LLM et la synthèse vocale fonctionnent localement. Les options non locales (OpenAI ou autres API) sont facultatives.
 

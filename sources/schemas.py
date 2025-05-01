@@ -1,7 +1,9 @@
+from typing import Callable, Tuple
 
-from typing import Tuple, Callable
 from pydantic import BaseModel
+
 from sources.utility import pretty_print
+
 
 class QueryRequest(BaseModel):
     query: str
@@ -15,6 +17,7 @@ class QueryRequest(BaseModel):
             "query": self.query,
             "tts_enabled": self.tts_enabled,
         }
+
 
 class QueryResponse(BaseModel):
     done: str
@@ -36,13 +39,15 @@ class QueryResponse(BaseModel):
             "success": self.success,
             "blocks": self.blocks,
             "status": self.status,
-            "uid": self.uid
+            "uid": self.uid,
         }
+
 
 class executorResult:
     """
     A class to store the result of a tool execution.
     """
+
     def __init__(self, block: str, feedback: str, success: bool, tool_type: str):
         """
         Initialize an agent with execution results.
@@ -57,19 +62,19 @@ class executorResult:
         self.feedback = feedback
         self.success = success
         self.tool_type = tool_type
-    
+
     def __str__(self):
         return f"Tool: {self.tool_type}\nBlock: {self.block}\nFeedback: {self.feedback}\nSuccess: {self.success}"
-    
+
     def jsonify(self):
         return {
             "block": self.block,
             "feedback": self.feedback,
             "success": self.success,
-            "tool_type": self.tool_type
+            "tool_type": self.tool_type,
         }
 
     def show(self):
-        pretty_print('▂'*64, color="status")
+        pretty_print("▂" * 64, color="status")
         pretty_print(self.feedback, color="success" if self.success else "failure")
-        pretty_print('▂'*64, color="status")
+        pretty_print("▂" * 64, color="status")

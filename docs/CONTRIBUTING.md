@@ -148,7 +148,7 @@ def execute(self, blocks: [str], safety: bool) -> str:
 
 This method defines how the tool processes the provided block(s) and produces a result.
 
-### 2. execution_failure_check 
+### 2. execution_failure_check
 
 ```
 @abstractmethod
@@ -189,7 +189,7 @@ class CasualAgent(Agent):
         } # No tools for the casual agent
         self.role = "en"
         self.type = "casual_agent"
-    
+
     def process(self, prompt, speech_module) -> str:
         self.memory.push('user', prompt)
         animate_thinking("Thinking...", color="status")
@@ -213,7 +213,7 @@ Push the user's prompt to the agent's memory using self.memory.push('user', prom
 Call self.llm_request() to generate a response and reasoning based on the memory context.
 Store and return the response and reasoning.
 
-Note the memory logic. You only need to push the 'user' message. The llm_request method take care of pushing the assistant message. 
+Note the memory logic. You only need to push the 'user' message. The llm_request method take care of pushing the assistant message.
 
 This separation of user and assistant memory handling may be inconsistent and could be refactored for clarity in the near future.
 
@@ -260,7 +260,7 @@ def execute_modules(self, answer: str) -> Tuple[bool, str]:
 The agent selection is done in 4 steps:
 1. determine query language and translate to english for the zero-shot model and llm_router.
 2. Estimate the task complexity and best agent.
-    - If HIGH complexity: return the planner agent. 
+    - If HIGH complexity: return the planner agent.
     - If LOW complexity: Determine the best agent for the task using a vote system between 2 classification models.
 3. Process high complexity query.
     - If task was high complexity, planner agent will create a json plan to divide and conqueer the task with multiple agent.

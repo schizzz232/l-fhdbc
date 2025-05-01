@@ -1,17 +1,18 @@
-import os
 import json
+import os
 from pathlib import Path
 
+
 class Cache:
-    def __init__(self, cache_dir='.cache', cache_file='messages.json'):
+    def __init__(self, cache_dir=".cache", cache_file="messages.json"):
         self.cache_dir = Path(cache_dir)
         self.cache_file = self.cache_dir / cache_file
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         if not self.cache_file.exists():
-            with open(self.cache_file, 'w') as f:
+            with open(self.cache_file, "w") as f:
                 json.dump([], f)
 
-        with open(self.cache_file, 'r') as f:
+        with open(self.cache_file, "r") as f:
             self.cache = set(json.load(f))
 
     def add_message_pair(self, user_message: str, assistant_message: str):
@@ -32,5 +33,5 @@ class Cache:
         return None
 
     def _save(self):
-        with open(self.cache_file, 'w') as f:
+        with open(self.cache_file, "w") as f:
             json.dump(self.cache, f, indent=2)

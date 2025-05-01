@@ -1,20 +1,23 @@
-import platform, os
 import asyncio
+import os
+import platform
 
-from sources.utility import pretty_print, animate_thinking
 from sources.agents.agent import Agent, executorResult
-from sources.tools.C_Interpreter import CInterpreter
-from sources.tools.GoInterpreter import GoInterpreter
-from sources.tools.PyInterpreter import PyInterpreter
-from sources.tools.BashInterpreter import BashInterpreter
-from sources.tools.JavaInterpreter import JavaInterpreter
-from sources.tools.fileFinder import FileFinder
 from sources.logger import Logger
+from sources.tools.BashInterpreter import BashInterpreter
+from sources.tools.C_Interpreter import CInterpreter
+from sources.tools.fileFinder import FileFinder
+from sources.tools.GoInterpreter import GoInterpreter
+from sources.tools.JavaInterpreter import JavaInterpreter
+from sources.tools.PyInterpreter import PyInterpreter
+from sources.utility import animate_thinking, pretty_print
+
 
 class CoderAgent(Agent):
     """
     The code agent is an agent that can write and execute code.
     """
+
     def __init__(self, name, prompt_path, provider, verbose=False):
         super().__init__(name, prompt_path, provider, verbose, None)
         self.tools = {
@@ -23,19 +26,21 @@ class CoderAgent(Agent):
             "c": CInterpreter(),
             "go": GoInterpreter(),
             "java": JavaInterpreter(),
-            "file_finder": FileFinder()
+            "file_finder": FileFinder(),
         }
         self.work_dir = self.tools["file_finder"].get_work_dir()
         self.role = "code"
         self.type = "code_agent"
         self.logger = Logger("code_agent.log")
-    
+
     def add_sys_info_prompt(self, prompt):
         """Add system information to the prompt."""
-        info = f"System Info:\n" \
-               f"OS: {platform.system()} {platform.release()}\n" \
-               f"Python Version: {platform.python_version()}\n" \
-               f"\nYou must save file at root directory: {self.work_dir}"
+        info = (
+            f"System Info:\n"
+            f"OS: {platform.system()} {platform.release()}\n"
+            f"Python Version: {platform.python_version()}\n"
+            f"\nYou must save file at root directory: {self.work_dir}"
+        )
         return f"{prompt}\n\n{info}"
 
     async def process(self, prompt, speech_module) -> str:
@@ -43,7 +48,7 @@ class CoderAgent(Agent):
         attempt = 0
         max_attempts = 4
         prompt = self.add_sys_info_prompt(prompt)
-        self.memory.push('user', prompt)
+        self.memory.push("user", prompt)
         clarify_trigger = "REQUEST_CLARIFICATION"
 
         while attempt < max_attempts:
@@ -75,9 +80,13 @@ class CoderAgent(Agent):
             attempt += 1
         self.status_message = "Ready"
         if attempt == max_attempts:
-            return "I'm sorry, I couldn't find a solution to your problem. How would you like me to proceed ?", reasoning
+            return (
+                "I'm sorry, I couldn't find a solution to your problem. How would you like me to proceed ?",
+                reasoning,
+            )
         self.last_answer = answer
         return answer, reasoning
+
 
 if __name__ == "__main__":
     pass

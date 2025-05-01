@@ -58,4 +58,3 @@ Assistant: I’ll use file_finder to locate the file:
 action=read
 name=config.txt
 ```
-

@@ -1,6 +1,7 @@
 import os
-import requests
+
 import dotenv
+import requests
 
 dotenv.load_dotenv()
 
@@ -8,6 +9,7 @@ if __name__ == "__main__":
     from tools import Tools
 else:
     from sources.tools.tools import Tools
+
 
 class FlightSearch(Tools):
     def __init__(self, api_key: str = None):
@@ -22,7 +24,7 @@ class FlightSearch(Tools):
     def execute(self, blocks: str, safety: bool = True) -> str:
         if self.api_key is None:
             return "Error: No AviationStack API key provided."
-        
+
         for block in blocks:
             flight_number = block.strip()
             if not flight_number:
@@ -33,7 +35,7 @@ class FlightSearch(Tools):
                 params = {
                     "access_key": self.api_key,
                     "flight_iata": flight_number,
-                    "limit": 1
+                    "limit": 1,
                 }
                 response = requests.get(url, params=params)
                 response.raise_for_status()
@@ -46,7 +48,7 @@ class FlightSearch(Tools):
                     departure = flight.get("departure", {})
                     arrival = flight.get("arrival", {})
                     airline = flight.get("airline", {}).get("name", "Unknown")
-                    
+
                     departure_airport = departure.get("airport", "Unknown")
                     departure_time = departure.get("scheduled", "Unknown")
                     arrival_airport = arrival.get("airport", "Unknown")

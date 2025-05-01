@@ -1,51 +1,69 @@
-
-import sys
 import re
-from io import StringIO
 import subprocess
+import sys
+from io import StringIO
 
 if __name__ == "__main__":
-    from tools import Tools
     from safety import is_unsafe
+    from tools import Tools
 else:
-    from sources.tools.tools import Tools
     from sources.tools.safety import is_unsafe
+    from sources.tools.tools import Tools
+
 
 class BashInterpreter(Tools):
     """
     This class is a tool to allow agent for bash code execution.
     """
+
     def __init__(self):
         super().__init__()
         self.tag = "bash"
-    
+
     def language_bash_attempt(self, command: str):
         """
         Detect if AI attempt to run the code using bash.
         If so, return True, otherwise return False.
         Code written by the AI will be executed automatically, so it should not use bash to run it.
         """
-        lang_interpreter = ["python", "gcc", "g++", "mvn", "go", "java", "javac", "rustc", "clang", "clang++", "rustc", "rustc++", "rustc++"]
+        lang_interpreter = [
+            "python",
+            "gcc",
+            "g++",
+            "mvn",
+            "go",
+            "java",
+            "javac",
+            "rustc",
+            "clang",
+            "clang++",
+            "rustc",
+            "rustc++",
+            "rustc++",
+        ]
         for word in command.split():
             if any(word.startswith(lang) for lang in lang_interpreter):
                 return True
         return False
-    
+
     def execute(self, commands: str, safety=False, timeout=300):
         """
         Execute bash commands and display output in real-time.
         """
         if safety and input("Execute command? y/n ") != "y":
             return "Command rejected by user."
-    
+
         concat_output = ""
         for command in commands:
             command = f"cd {self.work_dir} && {command}"
-            command = command.replace('\n', '')
+            command = command.replace("\n", "")
             if self.safe_mode and is_unsafe(commands):
                 print(f"Unsafe command rejected: {command}")
                 return "Unsafe command detected, execution aborted."
-            if self.language_bash_attempt(command) and self.allow_language_exec_bash == False:
+            if (
+                self.language_bash_attempt(command)
+                and self.allow_language_exec_bash == False
+            ):
                 continue
             try:
                 process = subprocess.Popen(
@@ -53,7 +71,7 @@ class BashInterpreter(Tools):
                     shell=True,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.STDOUT,
-                    universal_newlines=True
+                    universal_newlines=True,
                 )
                 command_output = ""
                 for line in process.stdout:
@@ -108,12 +126,13 @@ class BashInterpreter(Tools):
             r"undefined",
             r"refused",
             r"unreachable",
-            r"not known"
+            r"not known",
         ]
         combined_pattern = "|".join(error_patterns)
         if re.search(combined_pattern, feedback, re.IGNORECASE):
             return True
         return False
+
 
 if __name__ == "__main__":
     bash = BashInterpreter()
