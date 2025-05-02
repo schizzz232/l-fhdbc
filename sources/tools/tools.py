@@ -1,4 +1,3 @@
-
 """
 define a generic tool class, any tool can be used by the agent.
 
@@ -17,16 +16,19 @@ This is then executed by the tool with its own class implementation of execute()
 A tool is not just for code tool but also API, internet, etc..
 """
 
-import sys
-import os
 import configparser
+import os
+import sys
 from abc import abstractmethod
+
 from sources.logger import Logger
 
-class Tools():
+
+class Tools:
     """
     Abstract class for all tools.
     """
+
     def __init__(self):
         self.tag = "undefined"
         self.client = None
@@ -37,16 +39,16 @@ class Tools():
         self.excutable_blocks_found = False
         self.safe_mode = True
         self.allow_language_exec_bash = False
-    
+
     def get_work_dir(self):
         return self.work_dir
-    
+
     def set_allow_language_exec_bash(value: bool) -> None:
-        self.allow_language_exec_bash = value 
-    
+        self.allow_language_exec_bash = value
+
     def check_config_dir_validity(self):
         """Check if the config directory is valid."""
-        path = self.config['MAIN']['work_dir']
+        path = self.config["MAIN"]["work_dir"]
         if path == "":
             print("WARNING: Work directory not set in config.ini")
             return False
@@ -57,24 +59,26 @@ class Tools():
             print(f"WARNING: Work directory {path} does not exist")
             return False
         return True
-    
+
     def config_exists(self):
         """Check if the config file exists."""
-        return os.path.exists('./config.ini')
+        return os.path.exists("./config.ini")
 
     def create_work_dir(self):
         """Create the work directory if it does not exist."""
         default_path = os.path.dirname(os.getcwd())
         if self.config_exists():
-            self.config.read('./config.ini')
-            config_path = self.config['MAIN']['work_dir']
-            dir_path = default_path if not self.check_config_dir_validity() else config_path
+            self.config.read("./config.ini")
+            config_path = self.config["MAIN"]["work_dir"]
+            dir_path = (
+                default_path if not self.check_config_dir_validity() else config_path
+            )
         else:
             dir_path = default_path
         return dir_path
 
     @abstractmethod
-    def execute(self, blocks:[str], safety:bool) -> str:
+    def execute(self, blocks: [str], safety: bool) -> str:
         """
         Abstract method that must be implemented by child classes to execute the tool's functionality.
         Args:
@@ -86,7 +90,7 @@ class Tools():
         pass
 
     @abstractmethod
-    def execution_failure_check(self, output:str) -> bool:
+    def execution_failure_check(self, output: str) -> bool:
         """
         Abstract method that must be implemented by child classes to check if tool execution failed.
         Args:
@@ -97,7 +101,7 @@ class Tools():
         pass
 
     @abstractmethod
-    def interpreter_feedback(self, output:str) -> str:
+    def interpreter_feedback(self, output: str) -> str:
         """
         Abstract method that must be implemented by child classes to provide feedback to the AI from the tool.
         Args:
@@ -107,7 +111,7 @@ class Tools():
         """
         pass
 
-    def save_block(self, blocks:[str], save_path:str) -> None:
+    def save_block(self, blocks: [str], save_path: str) -> None:
         """
         Save code or query blocks to a file at the specified path.
         Creates the directory path if it doesn't exist.
@@ -125,9 +129,9 @@ class Tools():
             self.logger.info(f"Creating directory {directory}")
             os.makedirs(directory)
         for block in blocks:
-            with open(os.path.join(directory, save_path_file), 'w') as f:
+            with open(os.path.join(directory, save_path_file), "w") as f:
                 f.write(block)
-    
+
     def get_parameter_value(self, block: str, parameter_name: str) -> str:
         """
         Get a parameter name.
@@ -137,12 +141,12 @@ class Tools():
         Returns:
             str: The value of the parameter
         """
-        for param_line in block.split('\n'):
+        for param_line in block.split("\n"):
             if parameter_name in param_line:
-                param_value = param_line.split('=')[1].strip()
+                param_value = param_line.split("=")[1].strip()
                 return param_value
         return None
-    
+
     def found_executable_blocks(self):
         """
         Check if executable blocks were found.
@@ -163,8 +167,8 @@ class Tools():
                 - The path the code blocks was saved to
         """
         assert self.tag != "undefined", "Tag not defined"
-        start_tag = f'```{self.tag}' 
-        end_tag = '```'
+        start_tag = f"```{self.tag}"
+        end_tag = "```"
         code_blocks = []
         start_index = 0
         save_path = None
@@ -177,36 +181,38 @@ class Tools():
             if start_pos == -1:
                 break
 
-            line_start = llm_text.rfind('\n', 0, start_pos)+1
+            line_start = llm_text.rfind("\n", 0, start_pos) + 1
             leading_whitespace = llm_text[line_start:start_pos]
 
             end_pos = llm_text.find(end_tag, start_pos + len(start_tag))
             if end_pos == -1:
                 break
-            content = llm_text[start_pos + len(start_tag):end_pos]
-            lines = content.split('\n')
+            content = llm_text[start_pos + len(start_tag) : end_pos]
+            lines = content.split("\n")
             if leading_whitespace:
                 processed_lines = []
                 for line in lines:
                     if line.startswith(leading_whitespace):
-                        processed_lines.append(line[len(leading_whitespace):])
+                        processed_lines.append(line[len(leading_whitespace) :])
                     else:
                         processed_lines.append(line)
-                content = '\n'.join(processed_lines)
+                content = "\n".join(processed_lines)
 
-            if ':' in content.split('\n')[0]:
-                save_path = content.split('\n')[0].split(':')[1]
-                content = content[content.find('\n')+1:]
+            if ":" in content.split("\n")[0]:
+                save_path = content.split("\n")[0].split(":")[1]
+                content = content[content.find("\n") + 1 :]
             self.excutable_blocks_found = True
             code_blocks.append(content)
             start_index = end_pos + len(end_tag)
         self.logger.info(f"Found {len(code_blocks)} blocks to execute")
         return code_blocks, save_path
-    
+
+
 if __name__ == "__main__":
     tool = Tools()
     tool.tag = "python"
-    rt = tool.load_exec_block("""```python
+    rt = tool.load_exec_block(
+        """```python
 import os
 
 for file in os.listdir():
@@ -214,5 +220,6 @@ for file in os.listdir():
         print(file)
 ```
 goodbye!
-    """)
+    """
+    )
     print(rt)

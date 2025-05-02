@@ -1,15 +1,16 @@
+import asyncio
 import re
 import time
 from datetime import date
-from typing import List, Tuple, Type, Dict
 from enum import Enum
-import asyncio
+from typing import Dict, List, Tuple, Type
 
-from sources.utility import pretty_print, animate_thinking
 from sources.agents.agent import Agent
-from sources.tools.searxSearch import searxSearch
 from sources.browser import Browser
 from sources.logger import Logger
+from sources.tools.searxSearch import searxSearch
+from sources.utility import animate_thinking, pretty_print
+
 
 class Action(Enum):
     REQUEST_EXIT = "REQUEST_EXIT"
@@ -17,7 +18,8 @@ class Action(Enum):
     GO_BACK = "GO_BACK"
     NAVIGATE = "NAVIGATE"
     SEARCH = "SEARCH"
-    
+
+
 class BrowserAgent(Agent):
     def __init__(self, name, prompt_path, provider, verbose=False, browser=None):
         """
@@ -37,7 +39,7 @@ class BrowserAgent(Agent):
         self.notes = []
         self.date = self.get_today_date()
         self.logger = Logger("browser_agent.log")
-    
+
     def get_today_date(self) -> str:
         """Get the date"""
         date_time = date.today()
@@ -45,19 +47,19 @@ class BrowserAgent(Agent):
 
     def extract_links(self, search_result: str) -> List[str]:
         """Extract all links from a sentence."""
-        pattern = r'(https?://\S+|www\.\S+)'
+        pattern = r"(https?://\S+|www\.\S+)"
         matches = re.findall(pattern, search_result)
         trailing_punct = ".,!?;:)"
         cleaned_links = [link.rstrip(trailing_punct) for link in matches]
         self.logger.info(f"Extracted links: {cleaned_links}")
         return self.clean_links(cleaned_links)
-    
+
     def extract_form(self, text: str) -> List[str]:
         """Extract form written by the LLM in format [input_name](value)"""
         inputs = []
         matches = re.findall(r"\[\w+\]\([^)]+\)", text)
         return matches
-        
+
     def clean_links(self, links: List[str]) -> List[str]:
         """Ensure no '.' at the end of link"""
         links_clean = []
@@ -70,7 +72,13 @@ class BrowserAgent(Agent):
         return links_clean
 
     def get_unvisited_links(self) -> List[str]:
-        return "\n".join([f"[{i}] {link}" for i, link in enumerate(self.navigable_links) if link not in self.search_history])
+        return "\n".join(
+            [
+                f"[{i}] {link}"
+                for i, link in enumerate(self.navigable_links)
+                if link not in self.search_history
+            ]
+        )
 
     def make_newsearch_prompt(self, user_prompt: str, search_result: dict) -> str:
         search_choice = self.stringify_search_results(search_result)
@@ -83,14 +91,20 @@ class BrowserAgent(Agent):
         To proceed, choose a relevant link from the search results. Announce your choice by saying: "I will navigate to <link>"
         Do not explain your choice.
         """
-    
+
     def make_navigation_prompt(self, user_prompt: str, page_text: str) -> str:
-        remaining_links = self.get_unvisited_links() 
-        remaining_links_text = remaining_links if remaining_links is not None else "No links remaining, do a new search." 
+        remaining_links = self.get_unvisited_links()
+        remaining_links_text = (
+            remaining_links
+            if remaining_links is not None
+            else "No links remaining, do a new search."
+        )
         inputs_form = self.browser.get_form_inputs()
-        inputs_form_text = '\n'.join(inputs_form)
-        notes = '\n'.join(self.notes)
-        self.logger.info(f"Making navigation prompt with page text: {page_text[:100]}...\nremaining links: {remaining_links_text}")
+        inputs_form_text = "\n".join(inputs_form)
+        notes = "\n".join(self.notes)
+        self.logger.info(
+            f"Making navigation prompt with page text: {page_text[:100]}...\nremaining links: {remaining_links_text}"
+        )
         self.logger.info(f"Inputs form: {inputs_form_text}")
         self.logger.info(f"Notes: {notes}")
 
@@ -130,14 +144,14 @@ class BrowserAgent(Agent):
           - If yes to all, say {Action.REQUEST_EXIT}.
           - If no, or a page lacks info, go to another link.
           - Never stop or ask the user for help.
-        
+
         **Rules:**
         - Do not write "The page talk about ...", write your finding on the page and how they contribute to an answer.
         - Put note in a single paragraph.
         - When you exit, explain why.
-        
+
         # Example:
-        
+
         Example 1 (useful page, no need go futher):
         Note: According to karpathy site LeCun net is ...
         No link seem useful to provide futher information.
@@ -159,7 +173,7 @@ class BrowserAgent(Agent):
 
         Example 4 (loging form visible):
 
-        Note: I am on the login page, I will type the given username and password. 
+        Note: I am on the login page, I will type the given username and password.
         Action:
         [username_field](David)
         [password_field](edgerunners77)
@@ -171,21 +185,23 @@ class BrowserAgent(Agent):
         Do not Step-by-Step explanation. Write comprehensive Notes or Error as a long paragraph followed by your action.
         You must always take notes.
         """
-    
-    async def llm_decide(self, prompt: str, show_reasoning: bool = False) -> Tuple[str, str]:
+
+    async def llm_decide(
+        self, prompt: str, show_reasoning: bool = False
+    ) -> Tuple[str, str]:
         animate_thinking("Thinking...", color="status")
-        self.memory.push('user', prompt)
+        self.memory.push("user", prompt)
         answer, reasoning = await self.llm_request()
         if show_reasoning:
             pretty_print(reasoning, color="failure")
         pretty_print(answer, color="output")
         return answer, reasoning
-    
+
     def select_unvisited(self, search_result: List[str]) -> List[str]:
         results_unvisited = []
         for res in search_result:
             if res["link"] not in self.search_history:
-                results_unvisited.append(res) 
+                results_unvisited.append(res)
         self.logger.info(f"Unvisited links: {results_unvisited}")
         return results_unvisited
 
@@ -206,28 +222,30 @@ class BrowserAgent(Agent):
                     result_dict["link"] = line.replace("Link:", "").strip()
             if result_dict:
                 parsed_results.append(result_dict)
-        return parsed_results 
-    
+        return parsed_results
+
     def stringify_search_results(self, results_arr: List[str]) -> str:
-        return '\n\n'.join([f"Link: {res['link']}\nPreview: {res['snippet']}" for res in results_arr])
-    
+        return "\n\n".join(
+            [f"Link: {res['link']}\nPreview: {res['snippet']}" for res in results_arr]
+        )
+
     def parse_answer(self, text):
-        lines = text.split('\n')
+        lines = text.split("\n")
         saving = False
         buffer = []
         links = []
         for line in lines:
-            if line == '' or 'action:' in line.lower():
+            if line == "" or "action:" in line.lower():
                 saving = False
             if "note" in line.lower():
                 saving = True
             if saving:
-                buffer.append(line.replace("notes:", ''))
+                buffer.append(line.replace("notes:", ""))
             else:
                 links.extend(self.extract_links(line))
-        self.notes.append('. '.join(buffer).strip())
+        self.notes.append(". ".join(buffer).strip())
         return links
-    
+
     def select_link(self, links: List[str]) -> str | None:
         for lk in links:
             if lk == self.current_page:
@@ -237,10 +255,12 @@ class BrowserAgent(Agent):
             return lk
         self.logger.warning("No link selected.")
         return None
-    
+
     def conclude_prompt(self, user_query: str) -> str:
-        annotated_notes = [f"{i+1}: {note.lower()}" for i, note in enumerate(self.notes)]
-        search_note = '\n'.join(annotated_notes)
+        annotated_notes = [
+            f"{i+1}: {note.lower()}" for i, note in enumerate(self.notes)
+        ]
+        search_note = "\n".join(annotated_notes)
         pretty_print(f"AI notes:\n{search_note}", color="success")
         return f"""
         Following a human request:
@@ -251,7 +271,7 @@ class BrowserAgent(Agent):
         Expand on the finding or step that lead to success, and provide a conclusion that answer the request. Include link when possible.
         Do not give advices or try to answer the human. Just structure the AI finding in a structured and clear way.
         """
-    
+
     def search_prompt(self, user_prompt: str) -> str:
         return f"""
         Current date: {self.date}
@@ -259,7 +279,7 @@ class BrowserAgent(Agent):
         {user_prompt}
         Example:
         User: "go to twitter, login with username toto and password pass79 to my twitter and say hello everyone "
-        You: search: Twitter login page. 
+        You: search: Twitter login page.
 
         User: "I need info on the best laptops for AI this year."
         You: "search: best laptops 2025 to run Machine Learning model, reviews"
@@ -271,8 +291,10 @@ class BrowserAgent(Agent):
         Except if query does not make any sense for a web search then explain why and say {Action.REQUEST_EXIT.value}
         Do not try to answer query. you can only formulate search term or exit.
         """
-    
-    def handle_update_prompt(self, user_prompt: str, page_text: str, fill_success: bool) -> str:
+
+    def handle_update_prompt(
+        self, user_prompt: str, page_text: str, fill_success: bool
+    ) -> str:
         prompt = f"""
         You are a web browser.
         You just filled a form on the page.
@@ -290,13 +312,13 @@ class BrowserAgent(Agent):
             According to browser feedback, the form was not filled correctly. Is that so? you might consider other strategies.
             """
         return prompt
-    
+
     def show_search_results(self, search_result: List[str]):
         pretty_print("\nSearch results:", color="output")
         for res in search_result:
             pretty_print(f"Title: {res['title']} - ", color="info", no_newline=True)
             pretty_print(f"Link: {res['link']}", color="status")
-    
+
     def stuck_prompt(self, user_prompt: str, unvisited: List[str]) -> str:
         """
         Prompt for when the agent repeat itself, can happen when fail to extract a link.
@@ -308,7 +330,7 @@ class BrowserAgent(Agent):
         You must consider other options. Choose other link.
         """
         return prompt
-    
+
     async def process(self, user_prompt: str, speech_module: type) -> Tuple[str, str]:
         """
         Process the user prompt to conduct an autonomous web search.
@@ -323,11 +345,14 @@ class BrowserAgent(Agent):
         complete = False
 
         animate_thinking(f"Thinking...", color="status")
-        mem_begin_idx = self.memory.push('user', self.search_prompt(user_prompt))
+        mem_begin_idx = self.memory.push("user", self.search_prompt(user_prompt))
         ai_prompt, reasoning = await self.llm_request()
         if Action.REQUEST_EXIT.value in ai_prompt:
-            pretty_print(f"Web agent requested exit.\n{reasoning}\n\n{ai_prompt}", color="failure")
-            return ai_prompt, "" 
+            pretty_print(
+                f"Web agent requested exit.\n{reasoning}\n\n{ai_prompt}",
+                color="failure",
+            )
+            return ai_prompt, ""
         animate_thinking(f"Searching...", color="status")
         self.status_message = "Searching..."
         search_result_raw = self.tools["web_search"].execute([ai_prompt], False)
@@ -339,12 +364,12 @@ class BrowserAgent(Agent):
 
             self.memory.clear()
             unvisited = self.select_unvisited(search_result)
-            answer, reasoning = await self.llm_decide(prompt, show_reasoning = False)
+            answer, reasoning = await self.llm_decide(prompt, show_reasoning=False)
             if self.last_answer == answer:
                 prompt = self.stuck_prompt(user_prompt, unvisited)
                 continue
             self.last_answer = answer
-            pretty_print('▂'*32, color="status")
+            pretty_print("▂" * 32, color="status")
 
             extracted_form = self.extract_form(answer)
             if len(extracted_form) > 0:
@@ -365,7 +390,9 @@ class BrowserAgent(Agent):
             links = self.parse_answer(answer)
             link = self.select_link(links)
             if link == self.current_page:
-                pretty_print(f"Already visited {link}. Search callback.", color="status")
+                pretty_print(
+                    f"Already visited {link}. Search callback.", color="status"
+                )
                 prompt = self.make_newsearch_prompt(user_prompt, unvisited)
                 self.search_history.append(link)
                 continue
@@ -376,8 +403,14 @@ class BrowserAgent(Agent):
                 complete = True
                 break
 
-            if (link == None and len(extracted_form) < 3) or Action.GO_BACK.value in answer or link in self.search_history:
-                pretty_print(f"Going back to results. Still {len(unvisited)}", color="status")
+            if (
+                (link == None and len(extracted_form) < 3)
+                or Action.GO_BACK.value in answer
+                or link in self.search_history
+            ):
+                pretty_print(
+                    f"Going back to results. Still {len(unvisited)}", color="status"
+                )
                 self.status_message = "Going back to search results..."
                 prompt = self.make_newsearch_prompt(user_prompt, unvisited)
                 self.search_history.append(link)
@@ -385,7 +418,8 @@ class BrowserAgent(Agent):
                 continue
 
             animate_thinking(f"Navigating to {link}", color="status")
-            if speech_module: speech_module.speak(f"Navigating to {link}")
+            if speech_module:
+                speech_module.speak(f"Navigating to {link}")
             nav_ok = self.browser.go_to(link)
             self.search_history.append(link)
             if not nav_ok:
@@ -399,15 +433,18 @@ class BrowserAgent(Agent):
             self.status_message = "Navigating..."
             self.browser.screenshot()
 
-        pretty_print("Exited navigation, starting to summarize finding...", color="status")
+        pretty_print(
+            "Exited navigation, starting to summarize finding...", color="status"
+        )
         prompt = self.conclude_prompt(user_prompt)
-        mem_last_idx = self.memory.push('user', prompt)
+        mem_last_idx = self.memory.push("user", prompt)
         self.status_message = "Summarizing findings..."
         answer, reasoning = await self.llm_request()
         pretty_print(answer, color="output")
         self.status_message = "Ready"
         self.last_answer = answer
         return answer, reasoning
+
 
 if __name__ == "__main__":
     pass

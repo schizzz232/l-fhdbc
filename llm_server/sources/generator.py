@@ -1,8 +1,9 @@
-
-import threading
 import logging
+import threading
 from abc import abstractmethod
+
 from .cache import Cache
+
 
 class GenerationState:
     def __init__(self):
@@ -10,7 +11,7 @@ class GenerationState:
         self.last_complete_sentence = ""
         self.current_buffer = ""
         self.is_generating = False
-    
+
     def status(self) -> dict:
         return {
             "sentence": self.current_buffer,
@@ -19,23 +20,26 @@ class GenerationState:
             "is_generating": self.is_generating,
         }
 
-class GeneratorLLM():
+
+class GeneratorLLM:
     def __init__(self):
         self.model = None
         self.state = GenerationState()
         self.logger = logging.getLogger(__name__)
         handler = logging.StreamHandler()
         handler.setLevel(logging.INFO)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        formatter = logging.Formatter(
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        )
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
         self.logger.setLevel(logging.INFO)
         cache = Cache()
-    
+
     def set_model(self, model: str) -> None:
         self.logger.info(f"Model set to {model}")
         self.model = model
-    
+
     def start(self, history: list) -> bool:
         if self.model is None:
             raise Exception("Model not set")
@@ -46,7 +50,7 @@ class GeneratorLLM():
             self.logger.info("Starting generation")
             threading.Thread(target=self.generate, args=(history,)).start()
         return True
-    
+
     def get_status(self) -> dict:
         with self.state.lock:
             return self.state.status()
@@ -61,6 +65,7 @@ class GeneratorLLM():
             None
         """
         pass
+
 
 if __name__ == "__main__":
     generator = GeneratorLLM()

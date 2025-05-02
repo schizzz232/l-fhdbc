@@ -1,36 +1,43 @@
 #!/usr/bin/env python3
 
-import os, sys
-import uvicorn
-import aiofiles
-import configparser
 import asyncio
+import configparser
+import os
+import sys
 import time
-from typing import List
-from fastapi import FastAPI
-from fastapi.responses import JSONResponse
-from fastapi.responses import FileResponse
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 import uuid
+from typing import List
 
-from sources.llm_provider import Provider
-from sources.interaction import Interaction
-from sources.agents import CasualAgent, CoderAgent, FileAgent, PlannerAgent, BrowserAgent
+import aiofiles
+import uvicorn
+from celery import Celery
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
+
+from sources.agents import (
+    BrowserAgent,
+    CasualAgent,
+    CoderAgent,
+    FileAgent,
+    PlannerAgent,
+)
 from sources.browser import Browser, create_driver
-from sources.utility import pretty_print
+from sources.interaction import Interaction
+from sources.llm_provider import Provider
 from sources.logger import Logger
 from sources.schemas import QueryRequest, QueryResponse
-
-
-from celery import Celery
+from sources.utility import pretty_print
 
 api = FastAPI(title="AgenticSeek API", version="0.1.0")
-celery_app = Celery("tasks", broker="redis://localhost:6379/0", backend="redis://localhost:6379/0")
+celery_app = Celery(
+    "tasks", broker="redis://localhost:6379/0", backend="redis://localhost:6379/0"
+)
 celery_app.conf.update(task_track_started=True)
 logger = Logger("backend.log")
 config = configparser.ConfigParser()
-config.read('config.ini')
+config.read("config.ini")
 
 api.add_middleware(
     CORSMiddleware,
@@ -44,22 +51,28 @@ if not os.path.exists(".screenshots"):
     os.makedirs(".screenshots")
 api.mount("/screenshots", StaticFiles(directory=".screenshots"), name="screenshots")
 
+
 def initialize_system():
-    stealth_mode = config.getboolean('BROWSER', 'stealth_mode')
-    personality_folder = "jarvis" if config.getboolean('MAIN', 'jarvis_personality') else "base"
-    languages = config["MAIN"]["languages"].split(' ')
+    stealth_mode = config.getboolean("BROWSER", "stealth_mode")
+    personality_folder = (
+        "jarvis" if config.getboolean("MAIN", "jarvis_personality") else "base"
+    )
+    languages = config["MAIN"]["languages"].split(" ")
 
     provider = Provider(
         provider_name=config["MAIN"]["provider_name"],
         model=config["MAIN"]["provider_model"],
         server_address=config["MAIN"]["provider_server_address"],
-        is_local=config.getboolean('MAIN', 'is_local')
+        is_local=config.getboolean("MAIN", "is_local"),
     )
     logger.info(f"Provider initialized: {provider.provider_name} ({provider.model})")
 
     browser = Browser(
-        create_driver(headless=config.getboolean('BROWSER', 'headless_browser'), stealth_mode=stealth_mode),
-        anticaptcha_manual_install=stealth_mode
+        create_driver(
+            headless=config.getboolean("BROWSER", "headless_browser"),
+            stealth_mode=stealth_mode,
+        ),
+        anticaptcha_manual_install=stealth_mode,
     )
     logger.info("Browser initialized")
 
@@ -67,44 +80,53 @@ def initialize_system():
         CasualAgent(
             name=config["MAIN"]["agent_name"],
             prompt_path=f"prompts/{personality_folder}/casual_agent.txt",
-            provider=provider, verbose=False
+            provider=provider,
+            verbose=False,
         ),
         CoderAgent(
             name="coder",
             prompt_path=f"prompts/{personality_folder}/coder_agent.txt",
-            provider=provider, verbose=False
+            provider=provider,
+            verbose=False,
         ),
         FileAgent(
             name="File Agent",
             prompt_path=f"prompts/{personality_folder}/file_agent.txt",
-            provider=provider, verbose=False
+            provider=provider,
+            verbose=False,
         ),
         BrowserAgent(
             name="Browser",
             prompt_path=f"prompts/{personality_folder}/browser_agent.txt",
-            provider=provider, verbose=False, browser=browser
+            provider=provider,
+            verbose=False,
+            browser=browser,
         ),
         PlannerAgent(
             name="Planner",
             prompt_path=f"prompts/{personality_folder}/planner_agent.txt",
-            provider=provider, verbose=False, browser=browser
-        )
+            provider=provider,
+            verbose=False,
+            browser=browser,
+        ),
     ]
     logger.info("Agents initialized")
 
     interaction = Interaction(
         agents,
-        tts_enabled=config.getboolean('MAIN', 'speak'),
-        stt_enabled=config.getboolean('MAIN', 'listen'),
-        recover_last_session=config.getboolean('MAIN', 'recover_last_session'),
-        langs=languages
+        tts_enabled=config.getboolean("MAIN", "speak"),
+        stt_enabled=config.getboolean("MAIN", "listen"),
+        recover_last_session=config.getboolean("MAIN", "recover_last_session"),
+        langs=languages,
     )
     logger.info("Interaction initialized")
     return interaction
 
+
 interaction = initialize_system()
 is_generating = False
 query_resp_history = []
+
 
 @api.get("/screenshot")
 async def get_screenshot():
@@ -113,20 +135,20 @@ async def get_screenshot():
     if os.path.exists(screenshot_path):
         return FileResponse(screenshot_path)
     logger.error("No screenshot available")
-    return JSONResponse(
-        status_code=404,
-        content={"error": "No screenshot available"}
-    )
+    return JSONResponse(status_code=404, content={"error": "No screenshot available"})
+
 
 @api.get("/health")
 async def health_check():
     logger.info("Health check endpoint called")
     return {"status": "healthy", "version": "0.1.0"}
 
+
 @api.get("/is_active")
 async def is_active():
     logger.info("Is active endpoint called")
     return {"is_active": interaction.is_active}
+
 
 @api.get("/latest_answer")
 async def get_latest_answer():
@@ -134,15 +156,32 @@ async def get_latest_answer():
     if interaction.current_agent is None:
         return JSONResponse(status_code=404, content={"error": "No agent available"})
     uid = str(uuid.uuid4())
-    if not any(q["answer"] == interaction.current_agent.last_answer for q in query_resp_history):
+    if not any(
+        q["answer"] == interaction.current_agent.last_answer for q in query_resp_history
+    ):
         query_resp = {
             "done": "false",
             "answer": interaction.current_agent.last_answer,
-            "agent_name": interaction.current_agent.agent_name if interaction.current_agent else "None",
+            "agent_name": (
+                interaction.current_agent.agent_name
+                if interaction.current_agent
+                else "None"
+            ),
             "success": interaction.current_agent.success,
-            "blocks": {f'{i}': block.jsonify() for i, block in enumerate(interaction.get_last_blocks_result())} if interaction.current_agent else {},
-            "status": interaction.current_agent.get_status_message if interaction.current_agent else "No status available",
-            "uid": uid
+            "blocks": (
+                {
+                    f"{i}": block.jsonify()
+                    for i, block in enumerate(interaction.get_last_blocks_result())
+                }
+                if interaction.current_agent
+                else {}
+            ),
+            "status": (
+                interaction.current_agent.get_status_message
+                if interaction.current_agent
+                else "No status available"
+            ),
+            "uid": uid,
         }
         interaction.current_agent.last_answer = ""
         query_resp_history.append(query_resp)
@@ -150,6 +189,7 @@ async def get_latest_answer():
     if query_resp_history:
         return JSONResponse(status_code=200, content=query_resp_history[-1])
     return JSONResponse(status_code=404, content={"error": "No answer available"})
+
 
 async def think_wrapper(interaction, query, tts_enabled):
     try:
@@ -169,6 +209,7 @@ async def think_wrapper(interaction, query, tts_enabled):
         interaction.last_success = False
         raise e
 
+
 @api.post("/query", response_model=QueryResponse)
 async def process_query(request: QueryRequest):
     global is_generating, query_resp_history
@@ -180,7 +221,7 @@ async def process_query(request: QueryRequest):
         success="false",
         blocks={},
         status="Ready",
-        uid=str(uuid.uuid4())
+        uid=str(uuid.uuid4()),
     )
     if is_generating:
         logger.warning("Another query is being processed, please wait.")
@@ -196,7 +237,10 @@ async def process_query(request: QueryRequest):
             return JSONResponse(status_code=400, content=query_resp.jsonify())
 
         if interaction.current_agent:
-            blocks_json = {f'{i}': block.jsonify() for i, block in enumerate(interaction.current_agent.get_blocks_result())}
+            blocks_json = {
+                f"{i}": block.jsonify()
+                for i, block in enumerate(interaction.current_agent.get_blocks_result())
+            }
         else:
             logger.error("No current agent found")
             blocks_json = {}
@@ -210,7 +254,7 @@ async def process_query(request: QueryRequest):
         query_resp.agent_name = interaction.current_agent.agent_name
         query_resp.success = str(interaction.last_success)
         query_resp.blocks = blocks_json
-        
+
         # Store the raw dictionary representation
         query_resp_dict = {
             "done": query_resp.done,
@@ -219,7 +263,7 @@ async def process_query(request: QueryRequest):
             "success": query_resp.success,
             "blocks": query_resp.blocks,
             "status": query_resp.status,
-            "uid": query_resp.uid
+            "uid": query_resp.uid,
         }
         query_resp_history.append(query_resp_dict)
 
@@ -230,8 +274,9 @@ async def process_query(request: QueryRequest):
         sys.exit(1)
     finally:
         logger.info("Processing finished")
-        if config.getboolean('MAIN', 'save_session'):
+        if config.getboolean("MAIN", "save_session"):
             interaction.save_session()
+
 
 if __name__ == "__main__":
     uvicorn.run(api, host="0.0.0.0", port=8000)

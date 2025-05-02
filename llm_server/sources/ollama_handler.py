@@ -1,8 +1,10 @@
-
 import time
-from .generator import GeneratorLLM
-from .cache import Cache
+
 import ollama
+
+from .cache import Cache
+from .generator import GeneratorLLM
+
 
 class OllamaLLM(GeneratorLLM):
 
@@ -27,10 +29,10 @@ class OllamaLLM(GeneratorLLM):
                 stream=True,
             )
             for chunk in stream:
-                content = chunk['message']['content']
+                content = chunk["message"]["content"]
 
                 with self.state.lock:
-                    if '.' in content:
+                    if "." in content:
                         self.logger.info(self.state.current_buffer)
                     self.state.current_buffer += content
 
@@ -39,21 +41,19 @@ class OllamaLLM(GeneratorLLM):
                 self.logger.info(f"Downloading {self.model}...")
                 ollama.pull(self.model)
             if "refused" in str(e).lower():
-                raise Exception("Ollama connection failed. is the server running ?") from e
+                raise Exception(
+                    "Ollama connection failed. is the server running ?"
+                ) from e
             raise e
         finally:
             self.logger.info("Generation complete")
             with self.state.lock:
                 self.state.is_generating = False
 
+
 if __name__ == "__main__":
     generator = OllamaLLM()
-    history = [
-        {
-            "role": "user",
-            "content": "Hello, how are you ?"
-        }
-    ]
+    history = [{"role": "user", "content": "Hello, how are you ?"}]
     generator.set_model("deepseek-r1:1.5b")
     generator.start(history)
     while True:

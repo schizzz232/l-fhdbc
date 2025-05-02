@@ -60,7 +60,7 @@ mv .env.example .env
 
 ```sh
 python3 -m venv agentic_seek_env
-source agentic_seek_env/bin/activate     
+source agentic_seek_env/bin/activate
 # On Windows: agentic_seek_env\Scripts\activate
 ```
 
@@ -114,7 +114,7 @@ provider_server_address = 127.0.0.1:11434
 | lm-studio   | 是     | 使用 LM Studio 本地运行 LLM（将 `provider_name` 设置为 `lm-studio`）|
 | openai      | 否     | 使用兼容的 API                                        |
 
-下一步： [Start services and run AgenticSeek](#Start-services-and-Run)  
+下一步： [Start services and run AgenticSeek](#Start-services-and-Run)
 
 ---
 
@@ -136,7 +136,7 @@ provider_server_address = 127.0.0.1:5000
 
 同時更改你的 IP 為 openai-based api 的 IP。
 
-下一步： [Start services and run AgenticSeek](#Start-services-and-Run)  
+下一步： [Start services and run AgenticSeek](#Start-services-and-Run)
 
 ---
 
@@ -255,11 +255,11 @@ python3 cli.py
 
 ---
 
-## **在本地執行屬於你的 LLM 伺服器** 
+## **在本地執行屬於你的 LLM 伺服器**
 
 如果你有一台功能強大的電腦或伺服器，但你想透過筆記型電腦使用它，那麼你可以選擇在遠端伺服器上執行 LLM。
 
-### 1️⃣  **設定並啟動伺服器腳本** 
+### 1️⃣  **設定並啟動伺服器腳本**
 
 在運行 AI 模型的「伺服器」上，取得 IP 位址
 
@@ -292,7 +292,7 @@ python3 app.py --provider ollama --port 3333
 
 您可以選擇使用 `ollama` 或 `llamacpp` 作為 LLM 的服務框架。
 
-### 2️⃣ **執行** 
+### 2️⃣ **執行**
 
 在你的電腦上：
 
@@ -392,7 +392,7 @@ stealth_mode = False
 - work_dir
     - AgenticSeek 擁有能存取與交互的工作目錄。
 - jarvis_personality
-    > 就是那個鋼鐵人的 JARVIS 
+    > 就是那個鋼鐵人的 JARVIS
     - True：啟用 JARVIS 個性。
     - False：關閉 JARVIS 個性。
 - headless_browser
@@ -459,7 +459,7 @@ https://googlechromelabs.github.io/chrome-for-testing/
 
 ## FAQ
 
-**Q: 我需要什麼硬體？**  
+**Q: 我需要什麼硬體？**
 
 | 模型大小  | GPU  | 備註                                               |
 |-----------|--------|-----------------------------------------------------------|
@@ -513,4 +513,4 @@ DeepSeek R1 天生会说中文
 
 ## 作者:
  > [Fosowl](https://github.com/Fosowl)
- > [steveh8758](https://github.com/steveh8758) 
+ > [steveh8758](https://github.com/steveh8758)

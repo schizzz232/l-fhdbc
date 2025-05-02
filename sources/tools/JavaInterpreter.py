@@ -1,17 +1,19 @@
-import subprocess
 import os
-import tempfile
 import re
+import subprocess
+import tempfile
 
 if __name__ == "__main__":
     from tools import Tools
 else:
     from sources.tools.tools import Tools
 
+
 class JavaInterpreter(Tools):
     """
     This class is a tool to allow execution of Java code.
     """
+
     def __init__(self):
         super().__init__()
         self.tag = "java"
@@ -21,7 +23,7 @@ class JavaInterpreter(Tools):
         Execute Java code by compiling and running it.
         """
         output = ""
-        code = '\n'.join(codes) if isinstance(codes, list) else codes
+        code = "\n".join(codes) if isinstance(codes, list) else codes
 
         if safety and input("Execute code? y/n ") != "y":
             return "Code rejected by user."
@@ -29,16 +31,13 @@ class JavaInterpreter(Tools):
         with tempfile.TemporaryDirectory() as tmpdirname:
             source_file = os.path.join(tmpdirname, "Main.java")
             class_dir = tmpdirname
-            with open(source_file, 'w') as f:
+            with open(source_file, "w") as f:
                 f.write(code)
 
             try:
                 compile_command = ["javac", "-d", class_dir, source_file]
                 compile_result = subprocess.run(
-                    compile_command,
-                    capture_output=True,
-                    text=True,
-                    timeout=10
+                    compile_command, capture_output=True, text=True, timeout=10
                 )
 
                 if compile_result.returncode != 0:
@@ -46,10 +45,7 @@ class JavaInterpreter(Tools):
 
                 run_command = ["java", "-cp", class_dir, "Main"]
                 run_result = subprocess.run(
-                    run_command,
-                    capture_output=True,
-                    text=True,
-                    timeout=10
+                    run_command, capture_output=True, text=True, timeout=10
                 )
 
                 if run_result.returncode != 0:
@@ -88,16 +84,17 @@ class JavaInterpreter(Tools):
             r"cannot",
             r"stack trace",
             r"unresolved",
-            r"not found"
+            r"not found",
         ]
         combined_pattern = "|".join(error_patterns)
         if re.search(combined_pattern, feedback, re.IGNORECASE):
             return True
         return False
 
+
 if __name__ == "__main__":
     codes = [
-"""
+        """
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;

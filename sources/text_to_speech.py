@@ -1,30 +1,50 @@
-import os, sys
-import re
+import os
 import platform
+import re
 import subprocess
+import sys
 from sys import modules
-from typing import List, Tuple, Type, Dict
+from typing import Dict, List, Tuple, Type
 
-from kokoro import KPipeline
-from IPython.display import display, Audio
 import soundfile as sf
+from IPython.display import Audio, display
+from kokoro import KPipeline
 
-from sources.utility import pretty_print, animate_thinking
+from sources.utility import animate_thinking, pretty_print
 
-class Speech():
+
+class Speech:
     """
     Speech is a class for generating speech from text.
     """
-    def __init__(self, enable: bool = True, language: str = "en", voice_idx: int = 0) -> None:
-        self.lang_map = {
-            "en": 'a',
-            "zh": 'z',
-            "fr": 'f'
-        }
+
+    def __init__(
+        self, enable: bool = True, language: str = "en", voice_idx: int = 0
+    ) -> None:
+        self.lang_map = {"en": "a", "zh": "z", "fr": "f"}
         self.voice_map = {
-            "en": ['af_kore', 'af_bella', 'af_alloy', 'af_nicole', 'af_nova', 'af_sky', 'am_echo', 'am_michael', 'am_puck'],
-            "zh": ['zf_xiaobei', 'zf_xiaoni', 'zf_xiaoxiao', 'zf_xiaoyi', 'zm_yunjian', 'zm_yunxi', 'zm_yunxia', 'zm_yunyang'],
-            "fr": ['ff_siwis']
+            "en": [
+                "af_kore",
+                "af_bella",
+                "af_alloy",
+                "af_nicole",
+                "af_nova",
+                "af_sky",
+                "am_echo",
+                "am_michael",
+                "am_puck",
+            ],
+            "zh": [
+                "zf_xiaobei",
+                "zf_xiaoni",
+                "zf_xiaoxiao",
+                "zf_xiaoyi",
+                "zm_yunjian",
+                "zm_yunxi",
+                "zm_yunxia",
+                "zm_yunyang",
+            ],
+            "fr": ["ff_siwis"],
         }
         self.pipeline = None
         self.language = language
@@ -34,7 +54,7 @@ class Speech():
         self.speed = 1.2
         self.voice_folder = ".voices"
         self.create_voice_folder(self.voice_folder)
-    
+
     def create_voice_folder(self, path: str = ".voices") -> None:
         """
         Create a folder to store the voices.
@@ -58,22 +78,26 @@ class Speech():
             pretty_print("Invalid voice number, using default voice", color="error")
             voice_idx = 0
         sentence = self.clean_sentence(sentence)
-        audio_file = f"{self.voice_folder}/sample_{self.voice_map[self.language][voice_idx]}.wav"
+        audio_file = (
+            f"{self.voice_folder}/sample_{self.voice_map[self.language][voice_idx]}.wav"
+        )
         self.voice = self.voice_map[self.language][voice_idx]
         generator = self.pipeline(
-            sentence, voice=self.voice,
-            speed=self.speed, split_pattern=r'\n+'
+            sentence, voice=self.voice, speed=self.speed, split_pattern=r"\n+"
         )
         for i, (_, _, audio) in enumerate(generator):
-            if 'ipykernel' in modules: #only display in jupyter notebook.
-                display(Audio(data=audio, rate=24000, autoplay=i==0), display_id=False)
-            sf.write(audio_file, audio, 24000) # save each audio file
+            if "ipykernel" in modules:  # only display in jupyter notebook.
+                display(
+                    Audio(data=audio, rate=24000, autoplay=i == 0), display_id=False
+                )
+            sf.write(audio_file, audio, 24000)  # save each audio file
             if platform.system().lower() == "windows":
                 import winsound
+
                 winsound.PlaySound(audio_file, winsound.SND_FILENAME)
             elif platform.system().lower() == "darwin":  # macOS
                 subprocess.call(["afplay", audio_file])
-            else: # linux or other.
+            else:  # linux or other.
                 subprocess.call(["aplay", audio_file])
 
     def replace_url(self, url: re.Match) -> str:
@@ -85,8 +109,8 @@ class Speech():
             str: The domain name from the URL, or empty string if IP address
         """
         domain = url.group(1)
-        if re.match(r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', domain):
-            return ''
+        if re.match(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", domain):
+            return ""
         return domain
 
     def extract_filename(self, m: re.Match) -> str:
@@ -98,11 +122,11 @@ class Speech():
             str: The filename from the path
         """
         path = m.group()
-        parts = re.split(r'/|\\', path)
+        parts = re.split(r"/|\\", path)
         return parts[-1] if parts else path
-    
+
     def shorten_paragraph(self, sentence):
-        #TODO find a better way, we would like to have the TTS not be annoying, speak only useful informations
+        # TODO find a better way, we would like to have the TTS not be annoying, speak only useful informations
         """
         Find long paragraph like **explaination**: <long text> by keeping only the first sentence.
         Args:
@@ -110,14 +134,14 @@ class Speech():
         Returns:
             str: The shortened sentence
         """
-        lines = sentence.split('\n')
+        lines = sentence.split("\n")
         lines_edited = []
         for line in lines:
-            if line.startswith('**'):
-                lines_edited.append(line.split('.')[0])
+            if line.startswith("**"):
+                lines_edited.append(line.split(".")[0])
             else:
                 lines_edited.append(line)
-        return '\n'.join(lines_edited)
+        return "\n".join(lines_edited)
 
     def clean_sentence(self, sentence):
         """
@@ -127,17 +151,20 @@ class Speech():
         Returns:
             str: The cleaned text with URLs replaced by domain names, code blocks removed, etc..
         """
-        lines = sentence.split('\n')
-        filtered_lines = [line for line in lines if re.match(r'^\s*[a-zA-Z]', line)]
-        sentence = ' '.join(filtered_lines)
-        sentence = re.sub(r'`.*?`', '', sentence)
-        sentence = re.sub(r'https?://(?:www\.)?([^\s/]+)(?:/[^\s]*)?', self.replace_url, sentence)
-        sentence = re.sub(r'\b[\w./\\-]+\b', self.extract_filename, sentence)
-        sentence = re.sub(r'\b-\w+\b', '', sentence)
-        sentence = re.sub(r'[^a-zA-Z0-9.,!? _ -]+', ' ', sentence)
-        sentence = re.sub(r'\s+', ' ', sentence).strip()
-        sentence = sentence.replace('.com', '')
+        lines = sentence.split("\n")
+        filtered_lines = [line for line in lines if re.match(r"^\s*[a-zA-Z]", line)]
+        sentence = " ".join(filtered_lines)
+        sentence = re.sub(r"`.*?`", "", sentence)
+        sentence = re.sub(
+            r"https?://(?:www\.)?([^\s/]+)(?:/[^\s]*)?", self.replace_url, sentence
+        )
+        sentence = re.sub(r"\b[\w./\\-]+\b", self.extract_filename, sentence)
+        sentence = re.sub(r"\b-\w+\b", "", sentence)
+        sentence = re.sub(r"[^a-zA-Z0-9.,!? _ -]+", " ", sentence)
+        sentence = re.sub(r"\s+", " ", sentence).strip()
+        sentence = sentence.replace(".com", "")
         return sentence
+
 
 if __name__ == "__main__":
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -155,5 +182,5 @@ if __name__ == "__main__":
     spk.speak(tosay_en, voice_idx=0)
     spk = Speech(enable=True, language="fr", voice_idx=0)
     spk.speak(tosay_fr)
-    #spk = Speech(enable=True, language="zh", voice_idx=0)
-    #spk.speak(tosay_zh)
+    # spk = Speech(enable=True, language="zh", voice_idx=0)
+    # spk.speak(tosay_zh)

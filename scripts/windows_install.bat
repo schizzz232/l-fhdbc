@@ -2,8 +2,10 @@
 echo Starting installation for Windows...
 
 REM Install Python dependencies from requirements.txt
-pip install pyreadline3 
+pip install pyreadline3
 pip install -r requirements.txt
+REM Install Python dev dependencies from requirement-dev.txt
+pip install -r requirements-dev.txt
 
 REM Install Selenium
 pip install selenium

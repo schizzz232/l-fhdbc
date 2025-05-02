@@ -1,15 +1,16 @@
-
 import os
-import requests
+
 import dotenv
+import requests
 
 dotenv.load_dotenv()
 
 if __name__ == "__main__":
     import sys
+
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    from utility import animate_thinking, pretty_print
     from tools import Tools
+    from utility import animate_thinking, pretty_print
 else:
     from sources.tools.tools import Tools
     from sources.utility import animate_thinking, pretty_print
@@ -18,6 +19,7 @@ else:
 WARNING
 webSearch is fully deprecated and is being replaced by searxSearch for web search.
 """
+
 
 class webSearch(Tools):
     def __init__(self, api_key: str = None):
@@ -28,15 +30,22 @@ class webSearch(Tools):
         self.tag = "web_search"
         self.api_key = api_key or os.getenv("SERPAPI_KEY")  # Requires a SerpApi key
         self.paywall_keywords = [
-            "subscribe", "login to continue", "access denied", "restricted content", "404", "this page is not working"
+            "subscribe",
+            "login to continue",
+            "access denied",
+            "restricted content",
+            "404",
+            "this page is not working",
         ]
 
     def link_valid(self, link):
         """check if a link is valid."""
         if not link.startswith("http"):
             return "Status: Invalid URL"
-        
-        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+        }
         try:
             response = requests.get(link, headers=headers, timeout=5)
             status = response.status_code
@@ -78,7 +87,7 @@ class webSearch(Tools):
                     "q": query,
                     "api_key": self.api_key,
                     "num": 50,
-                    "output": "json"
+                    "output": "json",
                 }
                 response = requests.get(url, params=params)
                 response.raise_for_status()
@@ -87,7 +96,10 @@ class webSearch(Tools):
                 results = []
                 if "organic_results" in data and len(data["organic_results"]) > 0:
                     organic_results = data["organic_results"][:50]
-                    links = [result.get("link", "No link available") for result in organic_results]
+                    links = [
+                        result.get("link", "No link available")
+                        for result in organic_results
+                    ]
                     statuses = self.check_all_links(links)
                     for result, status in zip(organic_results, statuses):
                         if not "OK" in status:

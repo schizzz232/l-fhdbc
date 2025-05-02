@@ -1,36 +1,40 @@
 import os
-import requests
+from typing import Any, Dict, Optional
 from urllib.parse import urljoin
-from typing import Dict, Any, Optional
+
+import requests
 
 if __name__ == "__main__":
     from tools import Tools
 else:
     from sources.tools.tools import Tools
 
+
 class MCP_finder(Tools):
     """
     Tool to find MCPs server
     """
+
     def __init__(self, api_key: str = None):
         super().__init__()
         self.tag = "mcp"
         self.base_url = "https://registry.smithery.ai"
         self.headers = {
             "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
 
-    def _make_request(self, method: str, endpoint: str, params: Optional[Dict] = None, 
-                     data: Optional[Dict] = None) -> Dict[str, Any]:
+    def _make_request(
+        self,
+        method: str,
+        endpoint: str,
+        params: Optional[Dict] = None,
+        data: Optional[Dict] = None,
+    ) -> Dict[str, Any]:
         url = urljoin(self.base_url.rstrip(), endpoint)
         try:
             response = requests.request(
-                method=method,
-                url=url,
-                headers=self.headers,
-                params=params,
-                json=data
+                method=method, url=url, headers=self.headers, params=params, json=data
             )
             response.raise_for_status()
             return response.json()
@@ -46,7 +50,7 @@ class MCP_finder(Tools):
     def get_mcp_server_details(self, qualified_name: str) -> Dict[str, Any]:
         endpoint = f"/servers/{qualified_name}"
         return self._make_request("GET", endpoint)
-    
+
     def find_mcp_servers(self, query: str) -> Dict[str, Any]:
         """
         Finds a specific MCP server by its name.
@@ -63,18 +67,18 @@ class MCP_finder(Tools):
                 details = {
                     "name": name,
                     "description": mcp.get("description", "No description available"),
-                    "params": mcp.get("connections", [])
+                    "params": mcp.get("connections", []),
                 }
                 matching_mcp.append(details)
         return matching_mcp
-    
-    def execute(self, blocks: list, safety:bool = False) -> str:
+
+    def execute(self, blocks: list, safety: bool = False) -> str:
         if not blocks or not isinstance(blocks, list):
             return "Error: No blocks provided\n"
 
         output = ""
         for block in blocks:
-            block_clean = block.strip().lower().replace('\n', '')
+            block_clean = block.strip().lower().replace("\n", "")
             try:
                 matching_mcp_infos = self.find_mcp_servers(block_clean)
             except requests.exceptions.RequestException as e:
@@ -109,10 +113,16 @@ class MCP_finder(Tools):
             return "No output generated."
         return output.strip()
 
+
 if __name__ == "__main__":
     api_key = os.getenv("MCP_FINDER")
     tool = MCP_finder(api_key)
-    result = tool.execute(["""
+    result = tool.execute(
+        [
+            """
 news
-"""], False)
+"""
+        ],
+        False,
+    )
     print(result)

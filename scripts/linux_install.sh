@@ -31,5 +31,7 @@ sudo apt install -y docker-compose
 pip3 install selenium
 # Install Python dependencies from requirements.txt
 pip3 install -r requirements.txt --no-cache-dir
+# Install Python dev dependencies from requirement-dev.txt
+pip3 install -r requirements-dev.txt --no-cache-dir
 
 echo "Installation complete for Linux!"

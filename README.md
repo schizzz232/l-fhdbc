@@ -52,7 +52,7 @@ mv .env.example .env
 
 ```sh
 python3 -m venv agentic_seek_env
-source agentic_seek_env/bin/activate     
+source agentic_seek_env/bin/activate
 # On Windows: agentic_seek_env\Scripts\activate
 ```
 
@@ -74,7 +74,7 @@ For windows:
 
 First, you need to install these packages:
 
-- *Linux*: 
+- *Linux*:
 
 Updates package list (apt-get update).
 
@@ -92,7 +92,7 @@ Install chromedriver and selenium.
 
 - *Windows*:
 
-Install pyreadline3, selenium portaudio, pyAudio and chromedriver 
+Install pyreadline3, selenium portaudio, pyAudio and chromedriver
 
 Then install pip requirements:
 
@@ -109,7 +109,7 @@ python3 setup.py install
 **We recommend using at the very least Deepseek 14B, smaller models will struggle with tasks especially for web browsing.**
 
 
-**Setup your local provider**  
+**Setup your local provider**
 
 Start your local provider, for example with ollama:
 
@@ -142,7 +142,7 @@ provider_server_address = 127.0.0.1:11434
 | openai    | Yes     |  Use openai compatible API  |
 
 
-Next step: [Start services and run AgenticSeek](#Start-services-and-Run)  
+Next step: [Start services and run AgenticSeek](#Start-services-and-Run)
 
 *See the **Known issues** section if you are having issues*
 
@@ -170,7 +170,7 @@ Export your API key: `export <<PROVIDER>>_API_KEY="xxx"`
 Example: export `TOGETHER_API_KEY="xxxxx"`
 
 **List of API providers**
-  
+
 | Provider  | Local? | Description                                               |
 |-----------|--------|-----------------------------------------------------------|
 | openai    | Depends  | Use ChatGPT API  |
@@ -279,9 +279,9 @@ Instead, ask:
 
 ---
 
-## **Setup to run the LLM on your own server**  
+## **Setup to run the LLM on your own server**
 
-If you have a powerful computer or a server that you can use, but you want to use it from your laptop you have the options to run the LLM on a remote server using our custom llm server. 
+If you have a powerful computer or a server that you can use, but you want to use it from your laptop you have the options to run the LLM on a remote server using our custom llm server.
 
 On your "server" that will run the AI model, get the ip address
 
@@ -329,7 +329,7 @@ provider_server_address = x.x.x.x:3333
 ```
 
 
-Next step: [Start services and run AgenticSeek](#Start-services-and-Run)  
+Next step: [Start services and run AgenticSeek](#Start-services-and-Run)
 
 ---
 
@@ -472,7 +472,7 @@ If this section is incomplete please raise an issue.
 
 ## FAQ
 
-**Q: What hardware do I need?**  
+**Q: What hardware do I need?**
 
 | Model Size  | GPU  | Comment                                               |
 |-----------|--------|-----------------------------------------------------------|
@@ -481,15 +481,15 @@ If this section is incomplete please raise an issue.
 | 32B        | 24+ GB VRAM (e.g. RTX 4090) | 🚀 Success with most tasks, might still struggle with task planning |
 | 70B+        | 48+ GB Vram (eg. mac studio) | 💪 Excellent. Recommended for advanced use cases. |
 
-**Q: Why Deepseek R1 over other models?**  
+**Q: Why Deepseek R1 over other models?**
 
 Deepseek R1 excels at reasoning and tool use for its size. We think it’s a solid fit for our needs other models work fine, but Deepseek is our primary pick.
 
-**Q: I get an error running `cli.py`. What do I do?**  
+**Q: I get an error running `cli.py`. What do I do?**
 
 Ensure local is running (`ollama serve`), your `config.ini` matches your provider, and dependencies are installed. If none work feel free to raise an issue.
 
-**Q: Can it really run 100% locally?**  
+**Q: Can it really run 100% locally?**
 
 Yes with Ollama, lm-studio or server providers, all speech to text, LLM and text to speech model run locally. Non-local options (OpenAI or others API) are optional.
 
@@ -509,4 +509,4 @@ We’re looking for developers to improve AgenticSeek! Check out open issues or 
 
 ## Maintainers:
  > [Fosowl](https://github.com/Fosowl)
- > [steveh8758](https://github.com/steveh8758) 
+ > [steveh8758](https://github.com/steveh8758)

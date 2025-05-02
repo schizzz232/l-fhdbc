@@ -1,17 +1,19 @@
-import subprocess
 import os
-import tempfile
 import re
+import subprocess
+import tempfile
 
 if __name__ == "__main__":
     from tools import Tools
 else:
     from sources.tools.tools import Tools
 
+
 class GoInterpreter(Tools):
     """
     This class is a tool to allow execution of Go code.
     """
+
     def __init__(self):
         super().__init__()
         self.tag = "go"
@@ -21,7 +23,7 @@ class GoInterpreter(Tools):
         Execute Go code by compiling and running it.
         """
         output = ""
-        code = '\n'.join(codes) if isinstance(codes, list) else codes
+        code = "\n".join(codes) if isinstance(codes, list) else codes
 
         if safety and input("Execute code? y/n ") != "y":
             return "Code rejected by user."
@@ -29,7 +31,7 @@ class GoInterpreter(Tools):
         with tempfile.TemporaryDirectory() as tmpdirname:
             source_file = os.path.join(tmpdirname, "temp.go")
             exec_file = os.path.join(tmpdirname, "temp")
-            with open(source_file, 'w') as f:
+            with open(source_file, "w") as f:
                 f.write(code)
 
             try:
@@ -37,11 +39,7 @@ class GoInterpreter(Tools):
                 env["GO111MODULE"] = "off"
                 compile_command = ["go", "build", "-o", exec_file, source_file]
                 compile_result = subprocess.run(
-                    compile_command,
-                    capture_output=True,
-                    text=True,
-                    timeout=10,
-                    env=env
+                    compile_command, capture_output=True, text=True, timeout=10, env=env
                 )
 
                 if compile_result.returncode != 0:
@@ -49,10 +47,7 @@ class GoInterpreter(Tools):
 
                 run_command = [exec_file]
                 run_result = subprocess.run(
-                    run_command,
-                    capture_output=True,
-                    text=True,
-                    timeout=10
+                    run_command, capture_output=True, text=True, timeout=10
                 )
 
                 if run_result.returncode != 0:
@@ -91,16 +86,17 @@ class GoInterpreter(Tools):
             r"syntax",
             r"panic",
             r"undefined",
-            r"cannot"
+            r"cannot",
         ]
         combined_pattern = "|".join(error_patterns)
         if re.search(combined_pattern, feedback, re.IGNORECASE):
             return True
         return False
 
+
 if __name__ == "__main__":
     codes = [
-"""
+        """
 package main
 import "fmt"
 
@@ -108,11 +104,11 @@ func hello() {
     fmt.Println("Hello, World!")
 }
 """,
-"""
+        """
 func main() {
     hello()
 }
-"""
+""",
     ]
     g = GoInterpreter()
     print(g.execute(codes))
