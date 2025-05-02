@@ -42,6 +42,7 @@ sentencepiece>=0.2.0
 openai
 sniffio
 tqdm>4
+python-dotenv>=1.0.0
 # if use chinese
 ordered_set
 pypinyin

@@ -22,6 +22,9 @@ from sources.utility import pretty_print
 from sources.logger import Logger
 from sources.schemas import QueryRequest, QueryResponse
 
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from celery import Celery
 
@@ -234,4 +237,4 @@ async def process_query(request: QueryRequest):
             interaction.save_session()
 
 if __name__ == "__main__":
-    uvicorn.run(api, host="0.0.0.0", port=8000)
+    uvicorn.run(api, host="0.0.0.0", port=os.getenv("BACKEND_PORT") or 8000)
