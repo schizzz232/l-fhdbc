@@ -31,7 +31,7 @@ services:
     volumes:
       - ./searxng:/etc/searxng:rw
     environment:
-      - SEARXNG_BASE_URL=http://localhost:8080/
+      - SEARXNG_BASE_URL=${SEARXNG_BASE_URL:-http://localhost:8080/}
       - SEARXNG_SECRET_KEY=$(openssl rand -hex 32)
       - UWSGI_WORKERS=4
       - UWSGI_THREADS=4
@@ -62,7 +62,7 @@ services:
     environment:
       - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=true
-      - BACKEND_URL=http://backend:8000
+      - BACKEND_URL=${BACKEND_URL:-http://backend:8000}
     networks:
       - agentic-seek-net
   
@@ -70,31 +70,6 @@ services:
   # Therefore backend is run on host machine.
   # Open to pull requests to fix this.
 
-  #backend:
-  #  container_name: backend
-  #  build:
-  #    context: ./
-  #    dockerfile: Dockerfile.backend
-  #  stdin_open: true
-  #  tty: true
-  #  shm_size: 8g
-  #  ports:
-  #    - "8000:8000"
-  #  volumes:
-  #    - ./:/app
-  #  environment:
-  #    - NODE_ENV=development
-  #    - REDIS_URL=redis://redis:6379/0
-  #    - SEARXNG_URL=http://searxng:8080
-  #    - OLLAMA_URL=http://localhost:11434
-  #    - LM_STUDIO_URL=http://localhost:1234
-  #  extra_hosts:
-  #    - "host.docker.internal:host-gateway"
-  #  depends_on:
-  #    - redis
-  #    - searxng
-  #  networks:
-  #    - agentic-seek-net
   
 volumes:
   redis-data:
