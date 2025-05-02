@@ -75,6 +75,5 @@ if ! $COMPOSE_CMD up; then
     exit 1
 fi
 
-echo "Backend is expected to be running on port ${BACKEND_PORT:-8000}"
 
 sleep 10
