@@ -129,7 +129,7 @@ def create_driver(
         else:
             chrome_options.add_extension(crx_path)
 
-    chromedriver_path = "/usr/bin/chromedriver"
+    chromedriver_path = os.environ.get("CHROMEDRIVER_PATH")
     if not os.path.exists(chromedriver_path):
         chromedriver_path = chromedriver_autoinstaller.install()
 
