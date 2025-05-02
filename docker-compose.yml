@@ -62,7 +62,7 @@ services:
     environment:
       - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=true
-      - BACKEND_URL=${BACKEND_URL:-http://backend:8000}
+      - BACKEND_URL=http://backend:${BACKEND_PORT:-8000}
     networks:
       - agentic-seek-net
   

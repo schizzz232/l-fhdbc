@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Loading .env file
+source .env
+
 command_exists() {
     command -v "$1" &> /dev/null
 }
@@ -71,4 +74,7 @@ if ! $COMPOSE_CMD up; then
     echo "Possible fixes: Run with sudo or ensure port 8080 is free."
     exit 1
 fi
+
+echo "Backend is expected to be running on port ${BACKEND_PORT:-8000}"
+
 sleep 10
