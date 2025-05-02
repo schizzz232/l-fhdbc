@@ -14,6 +14,27 @@ if not exist docker-compose.yml (
     exit /b 1
 )
 
+REM Check and download Chrome bundle if not present
+echo Checking Chrome bundle...
+if not exist chrome_bundle\chrome136 (
+    echo Chrome bundle not found. Downloading...
+    if not exist chrome_bundle mkdir chrome_bundle
+    curl -L https://github.com/tcsenpai/agenticSeek/releases/download/utility/chrome136.zip -o %TEMP%\chrome136.zip
+    if %ERRORLEVEL% neq 0 (
+        echo Error: Failed to download Chrome bundle
+        exit /b 1
+    )
+    powershell -Command "Expand-Archive -Path '%TEMP%\chrome136.zip' -DestinationPath 'chrome_bundle' -Force"
+    if %ERRORLEVEL% neq 0 (
+        echo Error: Failed to extract Chrome bundle
+        exit /b 1
+    )
+    del %TEMP%\chrome136.zip
+    echo Chrome bundle downloaded and extracted successfully
+) else (
+    echo Chrome bundle already exists
+)
+
 REM Stop only containers in our project's network
 echo Stopping project containers...
 docker-compose down
