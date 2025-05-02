@@ -9,7 +9,10 @@ from kokoro import KPipeline
 from IPython.display import display, Audio
 import soundfile as sf
 
-from sources.utility import pretty_print, animate_thinking
+if __name__ == "__main__":
+    from utility import pretty_print, animate_thinking
+else:
+    from sources.utility import pretty_print, animate_thinking
 
 class Speech():
     """
@@ -140,6 +143,7 @@ class Speech():
         return sentence
 
 if __name__ == "__main__":
+    # TODO add info message for cn2an, jieba chinese related import
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     speech = Speech()
     tosay_en = """

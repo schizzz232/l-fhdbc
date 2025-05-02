@@ -13,6 +13,8 @@ from fake_useragent import UserAgent
 from selenium_stealth import stealth
 import undetected_chromedriver as uc
 import chromedriver_autoinstaller
+import certifi
+import ssl
 import time
 import random
 import os
@@ -26,6 +28,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from sources.utility import pretty_print, animate_thinking
 from sources.logger import Logger
+
 
 
 def get_chrome_path() -> str:
