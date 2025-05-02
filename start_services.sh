@@ -63,17 +63,39 @@ if [ ! -f "docker-compose.yml" ]; then
     exit 1
 fi
 
-# start docker compose for searxng, redis, frontend services
-echo "Warning: stopping all docker containers (t-4 seconds)..."
-sleep 4
-docker stop $(docker ps -a -q)
-echo "All containers stopped"
+# Stop only containers in our project's network
+echo "Stopping project containers..."
+$COMPOSE_CMD down
 
+# First start python-env and wait for it to be healthy
+echo "Starting python-env service..."
+if ! $COMPOSE_CMD up -d python-env; then
+    echo "Error: Failed to start python-env container."
+    exit 1
+fi
+
+# Wait for python-env to be healthy (check if it's running and not restarting)
+echo "Waiting for python-env to be ready..."
+for i in {1..30}; do
+    if [ "$(docker inspect -f '{{.State.Running}}' python-env)" = "true" ] && \
+       [ "$(docker inspect -f '{{.State.Restarting}}' python-env)" = "false" ]; then
+        echo "python-env is ready!"
+        break
+    fi
+    if [ $i -eq 30 ]; then
+        echo "Error: python-env failed to start properly after 30 seconds"
+        $COMPOSE_CMD logs python-env
+        exit 1
+    fi
+    sleep 1
+done
+
+# Now start the rest of the services
+echo "Starting remaining services..."
 if ! $COMPOSE_CMD up; then
     echo "Error: Failed to start containers. Check Docker logs with '$COMPOSE_CMD logs'."
     echo "Possible fixes: Run with sudo or ensure port 8080 is free."
     exit 1
 fi
-
 
 sleep 10
