@@ -1,6 +1,7 @@
 import unittest
 import os
 import sys
+from datetime import date
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))  # Add project root to Python path
 from sources.agents.browser_agent import BrowserAgent
 
@@ -12,6 +13,16 @@ class TestBrowserAgentParsing(unittest.TestCase):
             prompt_path="../prompts/base/browser_agent.txt",
             provider=None
         )
+
+    def test_agent_initialization(self):
+        #Test if agent is initialized with correct attributes
+        self.assertEqual(self.agent.get_agent_name, "TestAgent")
+        self.assertEqual(self.agent.get_agent_type, "browser_agent")
+        self.assertEqual(self.agent.get_agent_role, "web")
+
+    def test_agent_get_today_date(self):
+        #Test for get_today_data method
+        self.assertEqual(self.agent.get_today_date, date.today().date_time.strftime("%B %d, %Y"))
 
     def test_extract_links(self):
         # Test various link formats
