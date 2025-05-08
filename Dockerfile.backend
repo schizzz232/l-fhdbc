@@ -23,10 +23,13 @@ apt-get install -y \
         libatk-bridge2.0-0 \
         libgtk-4-1 \
         libnss3 \
-        xdg-utils \
-        wget && \
+        xdg-utils 
 
-RUN chmod +x /opt/chrome/chrome
+RUN     wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb 
+        dpkg -i google-chrome-stable_current_amd64.deb;  \
+        apt --fix-broken -y install
+
+#RUN chmod +x /opt/chrome/chrome
 # Install dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
